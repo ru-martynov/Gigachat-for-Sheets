@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+    }
+    textarea, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    textarea {
+      height: 150px;
+      resize: none;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: white;
+      background-position: right 10px center;
+      background-repeat: no-repeat;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M16.293%209.707c.39.39.39%201.024%200%201.414L12%2015.414%207.707%2011.12c-.39-.39-.39-1.024%200-1.414s1.024-.39%201.414%200L12%2013.586l2.879-2.879c.39-.391%201.024-.391%201.414%200z%22/%3E%3C/svg%3E');
+      padding-right: 30px;
+    }
+    .loading-button {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <textarea id="promptInput" placeholder="Введите ваш запрос на генерацию таблицы..."></textarea>
+  <select id="modelSelect">
+    <option value="GigaChat">GigaChat</option>
+    <option value="GigaChat-Plus">GigaChat-Plus</option>
+    <option value="GigaChat-Pro">GigaChat-Pro</option>
+  </select>
+  <button id="submitButton" onclick="submitPrompt()">Отправить</button>
+  <script>
+    function submitPrompt() {
+      var prompt = document.getElementById('promptInput').value;
+      var model = document.getElementById('modelSelect').value;
+      var button = document.getElementById('submitButton');
+      button.textContent = 'Загрузка...';
+      button.disabled = true;
+      button.classList.add('loading-button');
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          button.textContent = 'Отправить';
+          button.disabled = false;
+          button.classList.remove('loading-button');
+          google.script.host.close();
+        })
+        .withFailureHandler(function(error) {
+          button.textContent = 'Ошибка, попробуйте снова';
+          button.disabled = false;
+          button.classList.remove('loading-button');
+        })
+        .GIGACHAT_TABLE(prompt, model);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('modelSelect').value = 'GigaChat-Pro'; // Установка модели по умолчанию
+    });
+  </script>
+</body>
+</html>
