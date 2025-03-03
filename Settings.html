@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+    }
+    div {
+      width: 95%;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      /* Изменяем вид курсора при наведении */
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      /* Изменяем цвет кнопки, когда она отключена */
+      cursor: not-allowed;
+      /* Изменяем вид курсора, когда кнопка отключена */
+    }
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: white;
+      background-position: right 10px center;
+      background-repeat: no-repeat;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M16.293%209.707c.39.39.39%201.024%200%201.414L12%2015.414%207.707%2011.12c-.39-.39-.39-1.024%200-1.414s1.024-.39%201.414%200L12%2013.586l2.879-2.879c.39-.391%201.024-.391%201.414%200z%22/%3E%3C/svg%3E');
+      padding-right: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <label for="clientId">Client ID:</label>
+    <input type="text" id="clientId" name="clientId">
+  </div>
+  <div>
+    <label for="clientSecret">Client Secret:</label>
+    <input type="password" id="clientSecret" name="clientSecret">
+  </div>
+  <div>
+    <label for="scope">Scope:</label>
+    <input type="text" id="scope" name="scope">
+  </div>
+  <div>
+    <label for="temperature">Температура:</label>
+    <input type="text" id="temperature" name="temperature">
+  </div>
+  <div>
+    <label for="model">Модель:</label>
+    <select id="model" name="model">
+      <!-- Модели будут добавлены здесь -->
+    </select>
+  </div>
+  
+  <button id="saveButton" onclick="saveSettings()">Сохранить настройки</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      google.script.run.withSuccessHandler(function(settings) {
+        document.getElementById('clientId').value = settings.clientId || '';
+        document.getElementById('clientSecret').value = settings.clientSecret || '';
+        document.getElementById('scope').value = settings.scope || '';
+        document.getElementById('temperature').value = settings.temperature || '';
+        var modelSelect = document.getElementById('model');
+        settings.models.forEach(function(model) {
+          var option = document.createElement('option');
+          option.text = model;
+          option.value = model;
+          if (model === settings.currentModel) {
+            option.selected = true;
+          }
+          modelSelect.add(option);
+        });
+      }).getSettings();
+    });
+
+      function saveSettings() {
+      var clientId = document.getElementById('clientId').value;
+      var clientSecret = document.getElementById('clientSecret').value;
+      var scope = document.getElementById('scope').value;
+      var temperature = document.getElementById('temperature').value;
+      var model = document.getElementById('model').value;
+      var saveButton = document.getElementById('saveButton');
+      
+      saveButton.disabled = true; // Делаем кнопку неактивной при сохранении
+      saveButton.innerText = 'Сохраняю настройки...'; // Изменяем текст кнопки
+      
+      google.script.run.withSuccessHandler(function() {
+        saveButton.innerText = 'Настройки сохранены'; // Изменяем текст кнопки после сохранения
+        setTimeout(function() {
+          google.script.host.close(); // Закрыть окно после сохранения
+        }, 1000); // Ждем 1 секунду перед закрытием окна (можно изменить время по вашему усмотрению)
+      }).saveSettings(clientId, clientSecret, scope, temperature, model);
+    }
+  </script>
+</body>
+</html>
